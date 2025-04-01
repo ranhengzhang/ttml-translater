@@ -1,0 +1,34 @@
+name: Process Labeled Issue
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [labeled]
+
+jobs:
+  process-target-issue:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'ass'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install loguru PyGithub
+
+      # - name: Install Dependencies
+      #   run: pip install requests
+
+      - name: Run Processing Script
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ISSUE_NUMBER: ${{ github.event.issue.number }}
+            GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python to_ass.py
