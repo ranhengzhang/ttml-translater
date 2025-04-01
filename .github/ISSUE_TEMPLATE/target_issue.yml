@@ -1,0 +1,14 @@
+name: ASS 文件处理请求
+description: 将目标 TTML 文件转换为 ASS 字幕文件
+title: "[ASS] "
+labels: ["ass"]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: 请在此粘贴完整的文件 URL 地址（确保是可直接访问的 raw 链接）
+      description: |
+        示例：
+        https://raw.githubusercontent.com/username/repo/main/example.txt
+    validations:
+      required: true
