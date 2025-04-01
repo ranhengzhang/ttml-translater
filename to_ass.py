@@ -1,4 +1,5 @@
 import os
+from typing import Match
 
 from loguru import logger
 import requests
@@ -30,8 +31,19 @@ if __name__ == '__main__':
         issue = repo.get_issue(int(issue_number))
 
         # 获取Issue内容
-        body: str = issue.body
-        logger.info(body)
+        issue_body: str = issue.body
+
+        # 提取URL
+        url_pattern: str = r"(https?://[^\s]+)"
+        url_match: Match[str] = re.search(url_pattern, issue_body)
+
+        if not url_match:
+            logger.error('未找到有效 URL')
+            exit(0)
+
+        file_url: str = url_match.group(0)
+        logger.info(file_url)
+
     except Exception as e:
         logger.exception(e)
         if 'issue' in locals():
