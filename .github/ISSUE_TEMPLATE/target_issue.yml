@@ -6,7 +6,7 @@ body:
   - type: input
     id: url
     attributes:
-      label: 请在此粘贴完整的文件 URL 地址（确保是可直接访问的 raw 链接）
+      label: 文件 URL 地址
       description: |
         示例：
         https://raw.githubusercontent.com/username/repo/main/example.txt
