@@ -44,7 +44,7 @@ class TTML:
                 self.__have_ts |= line.have_ts()
                 self.__have_duet |= line.have_duet()
         else:
-            TTMLError.throw_dom_error()
+            raise TTMLError("TTML 文件结构错误")
 
     def to_lys(self) -> tuple[str, str | None]:
         orig_line: list[str] = []
