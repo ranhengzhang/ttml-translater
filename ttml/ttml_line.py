@@ -2,7 +2,7 @@ from re import Pattern, compile
 from typing import AnyStr
 from xml.dom.minidom import Element
 
-from ttml_syl import TTMLSyl
+from ttml.ttml_syl import TTMLSyl
 
 
 class TTMLLine:

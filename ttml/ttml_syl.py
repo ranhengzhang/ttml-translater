@@ -1,6 +1,6 @@
 from xml.dom.minidom import Element
 
-from ttml_time import TTMLTime
+from ttml.ttml_time import TTMLTime
 
 
 class TTMLSyl:

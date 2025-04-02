@@ -1,17 +1,8 @@
 from xml.dom.minicompat import NodeList
 from xml.dom.minidom import Document, Element
 
-from ttml_line import TTMLLine
-
-
-class TTMLError(Exception):
-    @staticmethod
-    def throw_dom_error():
-        raise TTMLError("TTML 文件结构错误")
-
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(message)  # 初始化父类，确保异常信息完整
+from ttml.ttml_line import TTMLLine
+from ttml.ttml_error import TTMLError
 
 
 class TTML:
@@ -53,7 +44,7 @@ class TTML:
                 self.__have_ts |= line.have_ts()
                 self.__have_duet |= line.have_duet()
         else:
-            raise TTMLError("TTML 文件结构错误")
+            TTMLError.throw_dom_error()
 
     def to_lys(self) -> tuple[str, str | None]:
         orig_line: list[str] = []
