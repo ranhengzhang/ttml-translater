@@ -46,6 +46,17 @@ class TTML:
         else:
             TTMLError.throw_dom_error()
 
+    def get_full_title(self) -> str|None:
+        artist: list[str] = []
+        title: list[str] = []
+        for meta in self.__metas:
+            if meta[0] == 'artists':
+                artist.append(meta[1])
+            if meta[0] == 'musicName':
+                title.append(meta[1])
+
+        return (' / '.join(artist) + ' - ' + ' - '.join(title)) if len(artist) != 0 and len(title) != 0 else None
+
     def to_lys(self) -> tuple[str, str | None]:
         orig_line: list[str] = []
         ts_line: list[str] | None = [] if self.__have_ts else None

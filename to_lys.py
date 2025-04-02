@@ -13,7 +13,7 @@ from requests import Response
 from ttml.ttml import TTML
 
 
-def process_content(content: str) -> str:
+def process_content(content: str) -> tuple[str, str|None]:
     """示例目标处理函数"""
     dom: Document = parseString(content)
     ttml: TTML = TTML(dom)
@@ -21,12 +21,12 @@ def process_content(content: str) -> str:
     comment: str = ''
     orig, ts = ttml.to_lys()
     logger.info(f"orig: \n{orig}")
-    comment += f'### ORIG\n\n```{orig}```\n\n'
+    comment += f'### ORIG\n\n```\n{orig}\n```\n\n'
     if ts:
         logger.info(f"ts: \n{ts}")
-        comment += f'### TS\n\n```{ts}```\n\n'
+        comment += f'### TS\n\n```\n{ts}\n```\n\n'
 
-    return comment
+    return comment, ttml.get_full_title()
 
 
 if __name__ == '__main__':
@@ -59,8 +59,10 @@ if __name__ == '__main__':
         file_response.raise_for_status()
         file_content: str = file_response.text
 
-        comment: str = process_content(file_content)
+        comment, title = process_content(file_content)
         issue.create_comment(comment)
+        if title is not None:
+            issue.edit(title=title)
 
     except Exception as e:
         logger.exception(e)
