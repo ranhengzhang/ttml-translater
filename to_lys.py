@@ -13,15 +13,20 @@ from requests import Response
 from ttml.ttml import TTML
 
 
-def process_content(content: str):
+def process_content(content: str) -> str:
     """示例目标处理函数"""
     dom: Document = parseString(content)
     ttml: TTML = TTML(dom)
     # 在这里添加您的自定义处理逻辑
+    comment: str = ''
     orig, ts = ttml.to_lys()
     logger.info(f"orig: \n{orig}")
+    comment += f'### ORIG\n\n```{orig}```\n\n'
     if ts:
         logger.info(f"ts: \n{ts}")
+        comment += f'### TS\n\n```{ts}```\n\n'
+
+    return comment
 
 
 if __name__ == '__main__':
@@ -54,7 +59,8 @@ if __name__ == '__main__':
         file_response.raise_for_status()
         file_content: str = file_response.text
 
-        process_content(file_content)
+        comment: str = process_content(file_content)
+        issue.create_comment(comment)
 
     except Exception as e:
         logger.exception(e)
