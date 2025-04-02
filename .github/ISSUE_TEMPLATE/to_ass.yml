@@ -1,7 +1,7 @@
-name: LYS 文件处理请求
-description: 将目标 TTML 文件转换为 LYS 字幕文件
-title: "[LYS] "
-labels: ["lys"]
+name: ASS 文件处理请求
+description: 将目标 TTML 文件转换为 ASS 字幕文件
+title: "[ASS] "
+labels: ["ass"]
 body:
   - type: input
     id: url
