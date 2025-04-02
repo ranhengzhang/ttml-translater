@@ -19,6 +19,9 @@ def process_content(content: str):
     ttml: TTML = TTML(dom)
     # 在这里添加您的自定义处理逻辑
     orig, ts = ttml.to_lys()
+    logger.info(f"orig: \n{orig}")
+    if ts:
+        logger.info(f"ts: \n{ts}")
 
 
 if __name__ == '__main__':
