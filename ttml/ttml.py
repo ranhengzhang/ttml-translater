@@ -54,8 +54,8 @@ class TTML:
                 artist.append(meta[1])
             if meta[0] == 'musicName':
                 title.append(meta[1])
-
-        return (' / '.join(artist) + ' - ' + ' - '.join(title)) if len(artist) != 0 and len(title) != 0 else None
+ 
+        return (' / '.join(artist) + ' - ' + title[0]) if len(artist) != 0 and len(title) != 0 else None
 
     def to_lys(self) -> tuple[str, str | None]:
         orig_line: list[str] = []

@@ -62,7 +62,7 @@ if __name__ == '__main__':
         comment, title = process_content(file_content)
         issue.create_comment(comment)
         if title is not None:
-            issue.edit(title=title)
+            issue.edit(title=f'[LYS] {title}')
 
     except Exception as e:
         logger.exception(e)
