@@ -48,3 +48,6 @@ if __name__ == '__main__':
         logger.exception(e)
         if 'issue' in locals():
             issue.create_comment(str(e))
+
+    finally:
+        issue.edit(state='closed')

@@ -32,15 +32,3 @@ jobs:
             ISSUE_NUMBER: ${{ github.event.issue.number }}
             GITHUB_REPOSITORY: ${{ github.repository }}
         run: python to_ass.py
-
-      - name: Close Issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              state: 'closed'
-            });
