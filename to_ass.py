@@ -8,11 +8,12 @@ import re
 from github import Github
 from github.Issue import Issue
 from github.Repository import Repository
+from requests import Response
 
 
 def process_content(content: str):
     """示例目标处理函数"""
-    print(f"处理内容长度: {len(content)} 字符")
+    logger.info(content)
     # 在这里添加您的自定义处理逻辑
 
 
@@ -34,7 +35,7 @@ if __name__ == '__main__':
         issue_body: str = issue.body
 
         # 提取URL
-        url_pattern: str = r"(https?://[^\s]+)"
+        url_pattern: str = r"https?://[^\s]+"
         url_match: Match[str] = re.search(url_pattern, issue_body)
 
         if not url_match:
@@ -42,7 +43,11 @@ if __name__ == '__main__':
             exit(0)
 
         file_url: str = url_match.group(0)
-        logger.info(file_url)
+        file_response: Response = requests.get(file_url)
+        file_response.raise_for_status()
+        file_content: str = file_response.text
+
+        process_content(file_content)
 
     except Exception as e:
         logger.exception(e)
