@@ -52,5 +52,14 @@ class TTML:
 
         for line in self.__lines:
             main, duet = line.lys_str(self.__have_bg, self.__have_duet)
+            main_orig, main_ts = main
+            orig_line.append(main_orig)
+            if main_ts:
+                ts_line.append(main_ts)
+            if duet:
+                duet_orig, duet_ts = duet
+                orig_line.append(duet_orig)
+                if duet_ts:
+                    ts_line.append(duet_ts)
 
         return '\n'.join(orig_line), '\n'.join(ts_line) if ts_line else None

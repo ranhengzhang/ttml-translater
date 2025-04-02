@@ -2,6 +2,8 @@ from re import Pattern, compile
 from typing import AnyStr
 from xml.dom.minidom import Element
 
+from urllib3.util import resolve_cert_reqs
+
 from ttml.ttml_syl import TTMLSyl
 
 
@@ -65,13 +67,26 @@ class TTMLLine:
     def have_duet(self) -> bool:
         return self.__is_duet
 
+    @staticmethod
+    def __lys_pre_process(line: list[TTMLSyl|str]) -> list[TTMLSyl|str]:
+        new_line: list[TTMLSyl|str] = []
+        for syl in line:
+            if type(syl) == str and len(new_line) > 0 and line.index(syl) != 0 and len(syl) < 2:
+                last_syl = new_line.pop()
+                last_syl.text += syl
+                new_line.append(last_syl)
+            else:
+                new_line.append(syl)
+
+        return new_line
+
     def __lys_role(self, have_bg: bool, have_duet: bool) -> int:
         return ((int(have_bg) + int(self.__is_bg)) * 3
                 + int(have_duet) + int(self.__is_duet))
 
     def __lys_raw(self, have_bg: bool, have_duet: bool) -> tuple[str, str | None]:
         return (f'[{self.__lys_role(have_bg, have_duet)}]' + ''.join(
-            [v if type(v) == str else v.lys_str() for v in self.__orig_line]),
+            [v if type(v) == str else v.lys_str() for v in TTMLLine.__lys_pre_process(self.__orig_line)]),
                 f'[{self.__begin}]{self.__ts_line}' if self.__ts_line else None)
 
     def lys_str(self, have_bg: bool, have_duet: bool) -> tuple[tuple[str, str | None], tuple[str, str | None] | None]:
