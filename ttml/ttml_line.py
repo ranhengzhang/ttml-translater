@@ -5,6 +5,7 @@ from xml.dom.minidom import Element
 from urllib3.util import resolve_cert_reqs
 
 from ttml.ttml_syl import TTMLSyl
+from ttml.ttml_time import TTMLTime
 
 
 class TTMLLine:
@@ -50,7 +51,8 @@ class TTMLLine:
                     # 音译行
                     self.__roma_line = f'{child.childNodes[0].nodeValue.data}'
 
-        self.__begin = self.__orig_line[0].get_begin()
+        self.__begin: TTMLTime = TTMLTime(element.getAttribute("begin"))
+        self.__end: TTMLTime = TTMLTime(element.getAttribute("end"))
 
         if is_bg:
             if TTMLLine.__before.search(self.__orig_line[0].text):
@@ -92,3 +94,35 @@ class TTMLLine:
     def lys_str(self, have_bg: bool, have_duet: bool) -> tuple[tuple[str, str | None], tuple[str, str | None] | None]:
         return self.__lys_raw(have_bg, have_duet), (
             self.__bg_line.__lys_raw(have_bg, have_duet) if self.__bg_line else None)
+
+    def spl_str(self) -> str:
+        orig: list[str] = []
+        pure: list[str] = []
+        last: TTMLTime|None = None
+
+        orig.append(f'[{self.__begin}]')
+        for syl in self.__orig_line:
+            if type(syl) == str:
+                orig.append(syl)
+                last = None
+                continue
+            begin, text, end = syl.spl_str()
+            if not (last is not None and not begin > last): # 空拍(下一词起始时间大于上一词结束时间)
+                orig.append(f'<{begin}>')
+            orig.append(text)
+            orig.append(f'<{end}>')
+            last = end
+        orig.append(f'[{self.__end}]')
+        pure.append(''.join(orig))
+        if self.__ts_line:
+            pure.append(self.__ts_line)
+        if self.__roma_line:
+            pure.append(self.__roma_line)
+        if self.__bg_line:
+            pure.append(''.join([str(syl) for syl in self.__bg_line.__orig_line]))
+            if self.__bg_line.__ts_line:
+                pure.append(self.__bg_line.__ts_line)
+            if self.__bg_line.__roma_line:
+                pure.append(self.__bg_line.__roma_line)
+
+        return '\n'.join(pure)

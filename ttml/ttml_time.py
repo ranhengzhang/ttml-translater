@@ -22,6 +22,9 @@ class TTMLTime:
     def __int__(self) -> int:
         return (self.__minute * 60 + self.__second) * 1000 + self.__micros
 
+    def __gt__(self, other) -> bool:
+        return (self.__minute, self.__second, self.__micros) > (other.__minute, other.__second, other.__micros)
+
     def __ge__(self, other) -> bool:
         return (self.__minute, self.__second, self.__micros) >= (other.__minute, other.__second, other.__micros)
 

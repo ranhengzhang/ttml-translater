@@ -1,7 +1,7 @@
-name: LYS 文件处理请求
-description: 将目标 TTML 文件转换为 LYS 歌词文件
-title: "[LYS] "
-labels: ["lys"]
+name: SPL 文件处理请求
+description: 将目标 TTML 文件转换为 SPL 歌词文件
+title: "[SPL] "
+labels: ["spl"]
 body:
   - type: input
     id: url
