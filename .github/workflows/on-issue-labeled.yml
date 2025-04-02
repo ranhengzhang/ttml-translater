@@ -40,3 +40,11 @@ jobs:
             ISSUE_NUMBER: ${{ github.event.issue.number }}
             GITHUB_REPOSITORY: ${{ github.repository }}
         run: python to_lys.py
+
+      - name: Run Processing Script For SPL
+        if: github.event.label.name == 'spl'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ISSUE_NUMBER: ${{ github.event.issue.number }}
+            GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python to_spl.py
