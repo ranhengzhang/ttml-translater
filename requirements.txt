@@ -1,0 +1,17 @@
+certifi==2025.1.31
+cffi==1.17.1
+charset-normalizer==3.4.1
+colorama==0.4.6
+cryptography==44.0.2
+Deprecated==1.2.18
+idna==3.10
+loguru==0.7.3
+pycparser==2.22
+PyGithub==2.6.1
+PyJWT==2.10.1
+PyNaCl==1.5.0
+requests==2.32.3
+typing_extensions==4.13.0
+urllib3==2.3.0
+win32_setctime==1.2.0
+wrapt==1.17.2
