@@ -1,10 +1,10 @@
 import os
-from typing import Match
+from typing import Match, AnyStr
 from xml.dom.minidom import parseString, Document
 
 from loguru import logger
 import requests
-import re
+from re import compile, Pattern
 
 from github import Github
 from github.Issue import Issue
@@ -12,18 +12,26 @@ from github.Repository import Repository
 from requests import Response
 from ttml.ttml import TTML
 
+reg: Pattern[AnyStr] = compile(r'[\\/:*?"<>|]')
 
 def process_content(content: str) -> tuple[str, str|None]:
     """示例目标处理函数"""
     dom: Document = parseString(content)
     ttml: TTML = TTML(dom)
     # 在这里添加您的自定义处理逻辑
-    comment: str = ''
     lrc = ttml.to_spl()
     logger.info(f"lrc: \n{lrc}")
-    comment += f'```\n{lrc}\n```'
+    comment: str = f'```\n{lrc}\n```'
 
-    return comment, ttml.get_full_title()
+    title: str|None = ttml.get_full_title()
+    file_name: str = reg.sub('-', title or "lrc")
+
+    if not os.path.exists('dist'):
+        os.makedirs('dist')
+    with open('dist/' + file_name + '.lrc', 'w', encoding='utf-8') as file:
+        file.write(lrc)
+
+    return comment, title
 
 
 if __name__ == '__main__':

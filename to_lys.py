@@ -1,10 +1,10 @@
 import os
-from typing import Match
+from typing import Match, AnyStr
 from xml.dom.minidom import parseString, Document
 
 from loguru import logger
 import requests
-import re
+from re import compile, Pattern, search
 
 from github import Github
 from github.Issue import Issue
@@ -12,6 +12,7 @@ from github.Repository import Repository
 from requests import Response
 from ttml.ttml import TTML
 
+reg: Pattern[AnyStr] = compile(r'[\\/:*?"<>|]')
 
 def process_content(content: str) -> tuple[str, str|None]:
     """示例目标处理函数"""
@@ -26,7 +27,18 @@ def process_content(content: str) -> tuple[str, str|None]:
         logger.info(f"ts: \n{ts}")
         comment += f'### TS\n\n```\n{ts}\n```\n\n'
 
-    return comment, ttml.get_full_title()
+    title: str|None = ttml.get_full_title()
+    file_name: str = reg.sub('-', title or "lrc")
+
+    if not os.path.exists('dist'):
+        os.makedirs('dist')
+    with open('dist/' + file_name + '.lys', 'w', encoding='utf-8') as orig_file:
+        orig_file.write(orig)
+    if ts:
+        with open('dist/' + file_name + '_trans.lrc', 'w', encoding='utf-8') as ts_file:
+            ts_file.write(ts)
+
+    return comment, title
 
 
 if __name__ == '__main__':
@@ -48,7 +60,7 @@ if __name__ == '__main__':
 
         # 提取URL
         url_pattern: str = r"https?://[^\s]+"
-        url_match: Match[str] = re.search(url_pattern, issue_body)
+        url_match: Match[str] = search(url_pattern, issue_body)
 
         if not url_match:
             logger.error('未找到有效 URL')

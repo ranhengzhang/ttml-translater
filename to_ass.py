@@ -22,17 +22,16 @@ def process_content(content: str):
     dom: Document = parseString(content)
     ttml: TTML = TTML(dom)
     # 在这里添加您的自定义处理逻辑
-    comment: str = ''
     ass = ttml.to_ass()
     logger.info(f"ass: \n{ass}")
-    comment += f'```\n{ass}\n```'
+    comment: str = f'```\n{ass}\n```'
 
-    title: str = ttml.get_full_title()
-    file_name: str = reg.sub('-', title)
+    title: str|None = ttml.get_full_title()
+    file_name: str = reg.sub('-', title or "lrc")
 
     if not os.path.exists('dist'):
         os.makedirs('dist')
-    with open('dist/' + file_name, 'w', encoding='utf-8') as file:
+    with open('dist/' + file_name + '.ass', 'w', encoding='utf-8') as file:
         file.write(ass)
 
     return comment, title
