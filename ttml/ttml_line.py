@@ -1,14 +1,28 @@
 from re import Pattern, compile
 from typing import AnyStr
 from xml.dom.minidom import Element
-
-from urllib3.util import resolve_cert_reqs
-
 from ttml.ttml_syl import TTMLSyl
 from ttml.ttml_time import TTMLTime
 
 
 class TTMLLine:
+    class ASSTime:
+        def __init__(self, ttml_time: TTMLTime):
+            count: int = int(ttml_time) // 10
+            self.__count: int = count
+            self.__centis = count % 100
+            count //= 100
+            self.__second = count % 60
+            count //= 60
+            self.__minute = count % 60
+            self.__hour = count // 60
+
+        def __str__(self) -> str:
+            return f'{self.__hour:02}:{self.__minute:02}:{self.__second:02}.{self.__centis:02}'
+
+        def __sub__(self, other) -> int:
+            return self.__count - other.__count
+
     __before: Pattern[AnyStr] = compile(r'^\(+')
     __after: Pattern[AnyStr] = compile(r'\)+$')
 
@@ -47,18 +61,18 @@ class TTMLLine:
                 elif role == "x-translation":
                     # 翻译行
                     self.__ts_line = f'{child.childNodes[0].data}'
-                elif role == "x-roma":
+                elif role == "x-roman":
                     # 音译行
-                    self.__roma_line = f'{child.childNodes[0].nodeValue.data}'
+                    self.__roma_line = f'{child.childNodes[0].data}'
 
         self.__begin: TTMLTime = TTMLTime(element.getAttribute("begin"))
         self.__end: TTMLTime = TTMLTime(element.getAttribute("end"))
 
         if is_bg:
             if TTMLLine.__before.search(self.__orig_line[0].text):
-                self.__orig_line[0].text = TTMLLine.__before.sub(self.__orig_line[0].text, '')
+                self.__orig_line[0].text = TTMLLine.__before.sub('', self.__orig_line[0].text)
             if TTMLLine.__after.search(self.__orig_line[-1].text):
-                self.__orig_line[-1].text = TTMLLine.__after.sub(self.__orig_line[-1].text, '')
+                self.__orig_line[-1].text = TTMLLine.__after.sub('', self.__orig_line[-1].text)
 
     def have_bg(self) -> bool:
         return self.__bg_line is not None
@@ -126,3 +140,53 @@ class TTMLLine:
                 pure.append(self.__bg_line.__roma_line)
 
         return '\n'.join(pure)
+
+    def __ass_text(self) -> str:
+        syls: list[tuple[TTMLLine.ASSTime,str]] = []
+        last: TTMLTime = self.__begin
+
+        for index, syl in enumerate(self.__orig_line):
+            if type(syl) == str: #  文本节点
+                # 以上一 syl 的结束作为起点，下一 syl 的起始作为终点
+                syls.append((TTMLLine.ASSTime(last), syl))
+                last = self.__orig_line[index + 1].get_begin() if index < len(self.__orig_line) - 1 else self.__end
+            else:
+                sbegin: TTMLTime = syl.get_begin()
+                if sbegin > last: # 出现空拍
+                    syls.append((TTMLLine.ASSTime(last), ''))
+                syls.append((TTMLLine.ASSTime(sbegin), syl.text))
+                last = syl.get_end()
+
+        send: TTMLLine.ASSTime = TTMLLine.ASSTime(self.__end)
+        text: list[str] = []
+
+        syls.reverse()
+        for sstart, stext in syls:
+            text.insert(0, rf'{{\k{send - sstart}}}{stext}')
+            send = sstart
+
+        return ''.join(text)
+
+    def ass_str(self) -> str:
+        line: list[str] = []
+
+        line.append('Dialogue: 0')
+        line.append(str(TTMLLine.ASSTime(self.__begin)))
+        line.append(str(TTMLLine.ASSTime(self.__end)))
+        line.append('orig')
+        line.append('x-bg' if self.__is_bg else 'x-duet' if self.__is_duet else '')
+        line.append('0')
+        line.append('0')
+        line.append('0')
+        line.append('karaoke')
+        line.append(self.__ass_text())
+
+        text: str = ','.join(line)
+        if self.__ts_line:
+            text += f'\nDialogue: 0,{str(TTMLLine.ASSTime(self.__begin))},{str(TTMLLine.ASSTime(self.__end))},ts,,0,0,0,karaoke,{self.__ts_line}'
+        if self.__roma_line:
+            text += f'\nDialogue: 0,{str(TTMLLine.ASSTime(self.__begin))},{str(TTMLLine.ASSTime(self.__end))},roma,,0,0,0,karaoke,{self.__roma_line}'
+        if self.__bg_line:
+            text += '\n' + self.__bg_line.ass_str()
+
+        return text

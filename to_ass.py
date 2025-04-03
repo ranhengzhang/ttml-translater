@@ -1,5 +1,6 @@
 import os
 from typing import Match
+from xml.dom.minidom import parseString, Document
 
 from loguru import logger
 import requests
@@ -10,11 +11,20 @@ from github.Issue import Issue
 from github.Repository import Repository
 from requests import Response
 
+from ttml.ttml import TTML
+
 
 def process_content(content: str):
     """示例目标处理函数"""
-    logger.info(content)
+    dom: Document = parseString(content)
+    ttml: TTML = TTML(dom)
     # 在这里添加您的自定义处理逻辑
+    comment: str = ''
+    ass = ttml.to_ass()
+    logger.info(f"ass: \n{ass}")
+    comment += f'```\n{ass}\n```'
+
+    return comment, ttml.get_full_title()
 
 
 if __name__ == '__main__':
