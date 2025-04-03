@@ -57,7 +57,10 @@ if __name__ == '__main__':
         file_response.raise_for_status()
         file_content: str = file_response.text
 
-        process_content(file_content)
+        comment, title = process_content(file_content)
+        issue.create_comment(comment)
+        if title is not None:
+            issue.edit(title=f'[ASS] {title}')
 
     except Exception as e:
         logger.exception(e)
