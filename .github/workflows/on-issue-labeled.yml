@@ -28,6 +28,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             ISSUE_NUMBER: ${{ github.event.issue.number }}
             GITHUB_REPOSITORY: ${{ github.repository }}
+            ARTIFACTS: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/
         run: python to_ass.py
 
       - name: Run Processing Script For LYS
@@ -45,3 +46,8 @@ jobs:
             ISSUE_NUMBER: ${{ github.event.issue.number }}
             GITHUB_REPOSITORY: ${{ github.repository }}
         run: python to_spl.py
+      - name: Upload Files To Action Artifact
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          name: Lyrics
+          path: dist/*

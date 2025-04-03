@@ -1,5 +1,5 @@
 import os
-from typing import Match
+from typing import Match, AnyStr
 from xml.dom.minidom import parseString, Document
 
 from loguru import logger
@@ -10,9 +10,12 @@ from github import Github
 from github.Issue import Issue
 from github.Repository import Repository
 from requests import Response
+from re import compile, Pattern
 
 from ttml.ttml import TTML
 
+
+reg: Pattern[AnyStr] = compile(r'[\\/:*?"<>|]')
 
 def process_content(content: str):
     """示例目标处理函数"""
@@ -24,7 +27,13 @@ def process_content(content: str):
     logger.info(f"ass: \n{ass}")
     comment += f'```\n{ass}\n```'
 
-    return comment, ttml.get_full_title()
+    title: str = ttml.get_full_title()
+    file_name: str = reg.sub('-', title)
+
+    with open('dist/' + file_name, 'w', encoding='utf-8') as file:
+        file.write(ass)
+
+    return comment, title
 
 
 if __name__ == '__main__':
@@ -58,6 +67,7 @@ if __name__ == '__main__':
         file_content: str = file_response.text
 
         comment, title = process_content(file_content)
+        issue.create_comment('文件下载页面：' + os.environ['ARTIFACTS'])
         issue.create_comment(comment)
         if title is not None:
             issue.edit(title=f'[ASS] {title}')
