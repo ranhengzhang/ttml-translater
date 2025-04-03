@@ -30,6 +30,8 @@ def process_content(content: str):
     title: str = ttml.get_full_title()
     file_name: str = reg.sub('-', title)
 
+    if not os.path.exists('dist'):
+        os.makedirs('dist')
     with open('dist/' + file_name, 'w', encoding='utf-8') as file:
         file.write(ass)
 
