@@ -65,6 +65,7 @@ if __name__ == '__main__':
         file_content: str = file_response.text
 
         comment, title = process_content(file_content)
+        issue.create_comment('文件下载页面：' + os.environ['ARTIFACTS'])
         issue.create_comment(comment)
         if title is not None:
             issue.edit(title=f'[SPL] {title}')
