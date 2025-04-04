@@ -1,4 +1,4 @@
-name: SPL 文件处理请求
+name: LRC 文件处理请求
 description: 将目标 TTML 文件转换为 LRC 歌词文件
 title: "[LRC] "
 labels: ["lrc"]
