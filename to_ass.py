@@ -53,16 +53,9 @@ if __name__ == '__main__':
 
         # 获取Issue内容
         issue_body: str = issue.body
+        issue_lines: list[str] = [line for line in issue_body.splitlines() if line]
 
-        # 提取URL
-        url_pattern: str = r"https?://[^\s]+"
-        url_match: Match[str] = re.search(url_pattern, issue_body)
-
-        if not url_match:
-            logger.error('未找到有效 URL')
-            exit(0)
-
-        file_url: str = url_match.group(0)
+        file_url: str = issue_lines[1]
         file_response: Response = requests.get(file_url)
         file_response.raise_for_status()
         file_content: str = file_response.text
