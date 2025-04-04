@@ -213,12 +213,19 @@ class TTMLLine:
         line: str = lbegin
 
         line += ''.join([v if type(v) == str else v.text for v in self.__orig_line])
-        if ext == 'ts' and self.__ts_line:
-            line += f'\n{lbegin}' + self.__ts_line
-        if ext == 'roma' and self.__roma_line:
-            line += f'\n{lbegin}' + self.__roma_line
-
         if self.__bg_line:
-            line += '\n' + self.__bg_line.lrc_str()
+            line += '\n' + f'({"".join([syl if type(syl) == str else syl.text for syl in self.__bg_line.__orig_line])})'
+
+        if ext == 'ts':
+            if self.__ts_line:
+                line += f'\n{lbegin}' + self.__ts_line
+            if self.__bg_line and self.__bg_line.__ts_line:
+                line += f'({self.__bg_line.__ts_line})'
+
+        if ext == 'roma':
+            if self.__roma_line:
+                line += f'\n{lbegin}' + self.__roma_line
+            if self.__bg_line and self.__bg_line.__roma_line:
+                line += f'({self.__bg_line.__roma_line})'
 
         return line
