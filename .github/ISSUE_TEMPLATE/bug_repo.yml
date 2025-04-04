@@ -1,10 +1,12 @@
 name: BUG 反馈
+description: 使用过程中遇到了问题
 title: "[BUG] "
 labels: ["bug"]
 body:
   - type: textarea
     id: main
     attributes:
-      description: 在这里填写出现的问题
+      label: Bug 具体内容
+      placeholder: 在这里填写出现的问题
     validations:
       required: true
