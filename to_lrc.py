@@ -14,12 +14,12 @@ from ttml.ttml import TTML
 
 reg: Pattern[AnyStr] = compile(r'[\\/:*?"<>|]')
 
-def process_content(content: str) -> tuple[str, str|None]:
+def process_content(content: str, ext: str|None) -> tuple[str, str|None]:
     """示例目标处理函数"""
     dom: Document = parseString(content)
     ttml: TTML = TTML(dom)
     # 在这里添加您的自定义处理逻辑
-    lrc = ttml.to_lrc()
+    lrc = ttml.to_lrc(ext)
     logger.info(f"lrc: \n{lrc}")
     comment: str = f'```\n{lrc}\n```'
 
@@ -50,22 +50,20 @@ if __name__ == '__main__':
 
         # 获取Issue内容
         issue_body: str = issue.body
-        logger.info(f"issue: \n{issue_body}")
+        issue_lines: list[str] = [line for line in issue_body.splitlines() if line]
 
-        # 提取URL
-        url_pattern: str = r"https?://[^\s]+"
-        url_match: Match[str] = search(url_pattern, issue_body)
-
-        if not url_match:
-            logger.error('未找到有效 URL')
-            exit(0)
-
-        file_url: str = url_match.group(0)
+        file_url: str = issue_lines[1]
         file_response: Response = requests.get(file_url)
         file_response.raise_for_status()
         file_content: str = file_response.text
 
-        comment, title = process_content(file_content)
+        extra: str|None = None
+        if issue_lines[3] == '翻译':
+            extra = 'ts'
+        elif issue_lines[3] == '音译':
+            extra = 'roma'
+
+        comment, title = process_content(file_content, extra)
         issue.create_comment('文件下载页面：' + os.environ['ARTIFACTS'])
         issue.create_comment(comment)
         if title is not None:
