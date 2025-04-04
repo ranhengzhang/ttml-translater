@@ -1,0 +1,14 @@
+name: SPL 文件处理请求
+description: 将目标 TTML 文件转换为 LRC 歌词文件
+title: "[LRC] "
+labels: ["lrc"]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: 文件 URL 地址
+      description: |
+        示例：
+        https://raw.githubusercontent.com/username/repo/main/example.txt
+    validations:
+      required: true

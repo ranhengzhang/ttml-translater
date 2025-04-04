@@ -115,3 +115,6 @@ class TTML:
             headers.append(line.ass_str())
 
         return '\n'.join(headers)
+
+    def to_lrc(self, ext: str|None = None) -> str:
+        return self.__header() + '\n\n' + '\n'.join([line.lrc_str(ext) for line in self.__lines])

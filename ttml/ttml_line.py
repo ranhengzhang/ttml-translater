@@ -23,6 +23,17 @@ class TTMLLine:
         def __sub__(self, other) -> int:
             return self.__count - other.__count
 
+    class LRCTime:
+        def __init__(self, ttml_time: TTMLTime):
+            count: int = int(ttml_time) // 10
+            self.centis = count % 100
+            count //= 100
+            self.__second = count % 60
+            self.__minute = count // 60
+
+        def __str__(self) -> str:
+            return f'{self.__minute:02}:{self.__second:02}.{self.centis:02}'
+
     __before: Pattern[AnyStr] = compile(r'^\(+')
     __after: Pattern[AnyStr] = compile(r'\)+$')
 
@@ -190,3 +201,18 @@ class TTMLLine:
             text += '\n' + self.__bg_line.ass_str()
 
         return text
+
+    def lrc_str(self, ext: str|None = None) -> str:
+        lbegin: str = f'[{TTMLLine.LRCTime(self.__orig_line[0].get_begin())}]'
+        line: str = lbegin
+
+        line += ''.join([v if type(v) == str else v.text for v in self.__orig_line])
+        if ext == 'ts' and self.__ts_line:
+            line += f'\n{lbegin}' + self.__ts_line
+        if ext == 'roma' and self.__roma_line:
+            line += f'\n{lbegin}' + self.__roma_line
+
+        if self.__bg_line:
+            line += '\n' + self.__bg_line.lrc_str()
+
+        return line
