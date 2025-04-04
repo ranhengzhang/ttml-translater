@@ -94,6 +94,12 @@ class TTMLLine:
     def have_duet(self) -> bool:
         return self.__is_duet
 
+    def get_begin(self) -> TTMLTime:
+        return self.__orig_line[0].get_begin()
+
+    def get_end(self) -> TTMLTime:
+        return self.__orig_line[-1].get_end()
+
     @staticmethod
     def __lys_pre_process(line: list[TTMLSyl|str]) -> list[TTMLSyl|str]:
         new_line: list[TTMLSyl|str] = []

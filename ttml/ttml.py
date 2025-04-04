@@ -3,6 +3,7 @@ from xml.dom.minidom import Document, Element
 
 from ttml.ttml_line import TTMLLine
 from ttml.ttml_error import TTMLError
+from ttml.ttml_time import TTMLTime
 
 
 class TTML:
@@ -117,4 +118,16 @@ class TTML:
         return '\n'.join(headers)
 
     def to_lrc(self, ext: str|None = None) -> str:
-        return self.__header() + '\n\n' + '\n'.join([line.lrc_str(ext) for line in self.__lines])
+        text: list[str] = []
+        last: TTMLTime|None = None
+
+        text.append(self.__header())
+        text.append('\n')
+        for index, line in enumerate(self.__lines):
+            if last and line.get_begin() - last >= 5*1000:
+                text.append(f'[{TTMLLine.LRCTime(last)}]')
+            text.append(line.lrc_str(ext))
+            last = line.get_end()
+        text.append(f'[{TTMLLine.LRCTime(last)}]')
+
+        return  '\n'.join(text)
