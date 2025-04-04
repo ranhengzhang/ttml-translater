@@ -12,3 +12,14 @@ body:
         https://raw.githubusercontent.com/username/repo/main/example.txt
     validations:
       required: true
+  - type: dropdown
+    id: extra
+    attributes:
+      label: 扩展内容（如果原歌词中有）
+      description: |
+        附加翻译/音译到 LRC 文件中
+      options:
+        - "无"
+        - "翻译"
+        - "音译"
+      default: "无"
