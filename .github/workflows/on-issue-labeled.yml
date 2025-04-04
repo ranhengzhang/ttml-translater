@@ -40,6 +40,15 @@ jobs:
             ARTIFACTS: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python to_lys.py
 
+      - name: Run Processing Script For LRC
+        if: github.event.label.name == 'lrc'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ISSUE_NUMBER: ${{ github.event.issue.number }}
+            GITHUB_REPOSITORY: ${{ github.repository }}
+            ARTIFACTS: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python to_lrc.py
+
       - name: Run Processing Script For SPL
         if: github.event.label.name == 'spl'
         env:
