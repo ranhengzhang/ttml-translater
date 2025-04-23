@@ -41,7 +41,7 @@ class TTMLLine:
         self.__orig_line: list[TTMLSyl | str] = []
         self.__bg_line: TTMLLine | None = None
 
-        self.__ts_line: str | None = None
+        self.__ts_line: list[tuple[str,str]] = []
         self.__roma_line: str | None = None
 
         self.__is_bg: bool = is_bg
@@ -63,7 +63,7 @@ class TTMLLine:
 
                 # 没有role代表是一个syl
                 if role == "":
-                    if child.childNodes[0].nodeValue:
+                    if len(child.childNodes) != 0 and child.childNodes[0].nodeValue:
                         self.__orig_line.append(TTMLSyl(child))
 
                 elif role == "x-bg":
@@ -71,7 +71,7 @@ class TTMLLine:
                     self.__bg_line = TTMLLine(child, True)
                 elif role == "x-translation":
                     # 翻译行
-                    self.__ts_line = f'{child.childNodes[0].data}'
+                    self.__ts_line.append((f'{child.childNodes[0].data}',child.getAttribute("xml:lang")))
                 elif role == "x-roman":
                     # 音译行
                     self.__roma_line = f'{child.childNodes[0].data}'
@@ -89,7 +89,7 @@ class TTMLLine:
         return self.__bg_line is not None
 
     def have_ts(self) -> bool:
-        return self.__ts_line is not None
+        return len(self.__ts_line) != 0
 
     def have_duet(self) -> bool:
         return self.__is_duet
@@ -120,7 +120,7 @@ class TTMLLine:
     def __lys_raw(self, have_bg: bool, have_duet: bool) -> tuple[str, str | None]:
         return (f'[{self.__lys_role(have_bg, have_duet)}]' + ''.join(
             [v if type(v) == str else v.lys_str() for v in TTMLLine.__lys_pre_process(self.__orig_line)]),
-                f'[{self.__begin}]{self.__ts_line}' if self.__ts_line else None)
+                f'[{self.__begin}]{self.__ts_line[0][0]}' if len(self.__ts_line) != 0 else None)
 
     def lys_str(self, have_bg: bool, have_duet: bool) -> tuple[tuple[str, str | None], tuple[str, str | None] | None]:
         return self.__lys_raw(have_bg, have_duet), (
@@ -145,14 +145,16 @@ class TTMLLine:
             last = end
         orig.append(f'[{self.__end}]')
         pure.append(''.join(orig))
-        if self.__ts_line:
-            pure.append(self.__ts_line)
+        if len(self.__ts_line) != 0:
+            for ts_line in self.__ts_line:
+                pure.append(ts_line[0])
         if self.__roma_line:
             pure.append(self.__roma_line)
         if self.__bg_line:
             pure.append(''.join([str(syl) for syl in self.__bg_line.__orig_line]))
-            if self.__bg_line.__ts_line:
-                pure.append(self.__bg_line.__ts_line)
+            if len(self.__bg_line.__ts_line) != 0:
+                for ts_line in self.__bg_line.__ts_line:
+                    pure.append(ts_line[0])
             if self.__bg_line.__roma_line:
                 pure.append(self.__bg_line.__roma_line)
 
@@ -199,8 +201,9 @@ class TTMLLine:
         line.append(self.__ass_text())
 
         text: str = ','.join(line)
-        if self.__ts_line:
-            text += f'\nDialogue: 0,{str(TTMLLine.ASSTime(self.__begin))},{str(TTMLLine.ASSTime(self.__end))},ts,,0,0,0,karaoke,{self.__ts_line}'
+        if len(self.__ts_line) != 0:
+            for ts_line in self.__ts_line:
+                text += f'\nDialogue: 0,{str(TTMLLine.ASSTime(self.__begin))},{str(TTMLLine.ASSTime(self.__end))},ts,x-lang:{ts_line[1]},0,0,0,karaoke,{ts_line[0]}'
         if self.__roma_line:
             text += f'\nDialogue: 0,{str(TTMLLine.ASSTime(self.__begin))},{str(TTMLLine.ASSTime(self.__end))},roma,,0,0,0,karaoke,{self.__roma_line}'
         if self.__bg_line:
@@ -217,10 +220,10 @@ class TTMLLine:
             line += '\n' + f'({"".join([syl if type(syl) == str else syl.text for syl in self.__bg_line.__orig_line])})'
 
         if ext == 'ts':
-            if self.__ts_line:
-                line += f'\n{lbegin}' + self.__ts_line
-            if self.__bg_line and self.__bg_line.__ts_line:
-                line += f'({self.__bg_line.__ts_line})'
+            if len(self.__ts_line) != 0:
+                line += f'\n{lbegin}' + self.__ts_line[0][0]
+            if self.__bg_line and len(self.__bg_line.__ts_line) != 0:
+                line += f'({self.__bg_line.__ts_line[0][0]})'
 
         if ext == 'roma':
             if self.__roma_line:
