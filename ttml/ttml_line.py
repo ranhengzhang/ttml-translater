@@ -80,10 +80,16 @@ class TTMLLine:
         self.__end: TTMLTime = TTMLTime(element.getAttribute("end"))
 
         if is_bg:
-            if TTMLLine.__before.search(self.__orig_line[0].text):
-                self.__orig_line[0].text = TTMLLine.__before.sub('', self.__orig_line[0].text)
-            if TTMLLine.__after.search(self.__orig_line[-1].text):
-                self.__orig_line[-1].text = TTMLLine.__after.sub('', self.__orig_line[-1].text)
+            if TTMLLine.__before.search(self.__orig_line[0] if type(self.__orig_line[0]) == str else self.__orig_line[0].text):
+                if type(self.__orig_line[0]) == str:
+                    self.__orig_line[0] = TTMLLine.__before.sub('', self.__orig_line[0])
+                else:
+                    self.__orig_line[0].text = TTMLLine.__before.sub('', self.__orig_line[0].text)
+            if TTMLLine.__after.search(self.__orig_line[-1] if type(self.__orig_line[-1]) == str else self.__orig_line[-1].text):
+                if type(self.__orig_line[-1]) == str:
+                    self.__orig_line[-1] = TTMLLine.__after.sub('', self.__orig_line[-1])
+                else:
+                    self.__orig_line[-1].text = TTMLLine.__after.sub('', self.__orig_line[-1].text)
 
     def have_bg(self) -> bool:
         return self.__bg_line is not None
