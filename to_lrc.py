@@ -56,6 +56,7 @@ if __name__ == '__main__':
         file_response: Response = requests.get(file_url)
         file_response.raise_for_status()
         file_content: str = file_response.text
+        issue.create_comment(f'文件留档：\n\n```${file_content}```')
 
         extra: str|None = None
         if issue_lines[3] == '翻译':
