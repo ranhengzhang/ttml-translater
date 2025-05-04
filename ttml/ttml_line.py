@@ -157,7 +157,7 @@ class TTMLLine:
         if self.__roma_line:
             pure.append(self.__roma_line)
         if self.__bg_line:
-            pure.append(''.join([str(syl) for syl in self.__bg_line.__orig_line]))
+            pure.append(''.join([syl if type(syl) == str else syl.text for syl in self.__bg_line.__orig_line]))
             if len(self.__bg_line.__ts_line) != 0:
                 for ts_line in self.__bg_line.__ts_line:
                     pure.append(ts_line[0])
