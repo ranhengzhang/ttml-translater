@@ -101,10 +101,10 @@ class TTMLLine:
         return self.__is_duet
 
     def get_begin(self) -> TTMLTime:
-        return self.__orig_line[0].get_begin()
+        return self.__begin if type(self.__orig_line[0]) == str else self.__orig_line[0].get_begin()
 
     def get_end(self) -> TTMLTime:
-        return self.__orig_line[-1].get_end()
+        return self.__end if type(self.__orig_line[-1]) == str else self.__orig_line[-1].get_end()
 
     @staticmethod
     def __lys_pre_process(line: list[TTMLSyl|str]) -> list[TTMLSyl|str]:
@@ -124,8 +124,9 @@ class TTMLLine:
                 + int(have_duet) + int(self.__is_duet))
 
     def __lys_raw(self, have_bg: bool, have_duet: bool) -> tuple[str, str | None]:
-        return (f'[{self.__lys_role(have_bg, have_duet)}]' + ''.join(
-            [v if type(v) == str else v.lys_str() for v in TTMLLine.__lys_pre_process(self.__orig_line)]),
+        return (f'[{self.__lys_role(have_bg, have_duet)}]' + (''.join(
+            [v if type(v) == str else v.lys_str() for v in TTMLLine.__lys_pre_process(self.__orig_line)] if len(
+                self.__orig_line) != 1 or type(self.__orig_line[0]) != str else f'{self.__orig_line[0]}({int(self.get_begin())},{self.get_end() - self.get_begin()})')),
                 f'[{self.__begin}]{self.__ts_line[0][0]}' if len(self.__ts_line) != 0 else None)
 
     def lys_str(self, have_bg: bool, have_duet: bool) -> tuple[tuple[str, str | None], tuple[str, str | None] | None]:
