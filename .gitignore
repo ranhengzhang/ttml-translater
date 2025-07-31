@@ -1,2 +1,6 @@
 /.idea/
 /.venv/
+**/__pycache__/**
+out.txt
+main.py
+in.txt
