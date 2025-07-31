@@ -1,6 +1,7 @@
 from re import Pattern, compile
 from typing import AnyStr
 from xml.dom.minidom import Element
+
 from ttml.ttml_syl import TTMLSyl
 from ttml.ttml_time import TTMLTime
 
@@ -37,18 +38,19 @@ class TTMLLine:
     __before: Pattern[AnyStr] = compile(r'^\(+')
     __after: Pattern[AnyStr] = compile(r'\)+$')
 
-    def __init__(self, element: Element, is_bg: bool = False):
+    def __init__(self, element: Element, parent = None):
+        self.__is_duet: bool = False
         self.__orig_line: list[TTMLSyl | str] = []
         self.__bg_line: TTMLLine | None = None
 
         self.__ts_line: list[tuple[str,str]] = []
         self.__roma_line: str | None = None
 
-        self.__is_bg: bool = is_bg
+        self.__is_bg: bool = parent is not None
 
         # 获取传入元素的 agent 属性
         agent: str = element.getAttribute("ttm:agent")
-        self.__is_duet: bool = bool(agent and agent != 'v1')
+        self.__is_duet = bool(agent and agent != 'v1') if parent is None else parent.__is_duet
 
         # 获取 <p> 元素的所有子节点，包括文本节点
         child_elements: list[Element] = element.childNodes  # iter() 会返回所有子元素和文本节点
@@ -68,7 +70,7 @@ class TTMLLine:
 
                 elif role == "x-bg":
                     # 和声行
-                    self.__bg_line = TTMLLine(child, True)
+                    self.__bg_line = TTMLLine(child, self)
                 elif role == "x-translation":
                     # 翻译行
                     self.__ts_line.append((f'{child.childNodes[0].data}',child.getAttribute("xml:lang")))
@@ -79,7 +81,7 @@ class TTMLLine:
         self.__begin: TTMLTime = TTMLTime(element.getAttribute("begin"))
         self.__end: TTMLTime = TTMLTime(element.getAttribute("end"))
 
-        if is_bg:
+        if self.__is_bg:
             if TTMLLine.__before.search(self.__orig_line[0] if type(self.__orig_line[0]) == str else self.__orig_line[0].text):
                 if type(self.__orig_line[0]) == str:
                     self.__orig_line[0] = TTMLLine.__before.sub('', self.__orig_line[0])
