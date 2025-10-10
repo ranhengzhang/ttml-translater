@@ -24,7 +24,7 @@ class TTML:
 
         if body and head:
             # 获取body/head中的<div>/<metadata>子元素
-            div: Element = body.getElementsByTagName('div')[0]
+            divs: list[Element] = body.getElementsByTagName('div')
             metadata: Element = head.getElementsByTagName('metadata')[0]
             meta_elements: NodeList[Element] = metadata.getElementsByTagName('amll:meta')
 
@@ -34,16 +34,19 @@ class TTML:
                 value: str = meta.getAttribute("value")
                 self.__metas.append((key, value))
 
-            # 获取div中的所有<p>子元素
-            p_elements: NodeList[Element] = div.getElementsByTagName('p')
+            index: int = 0
+            for div in divs:
+                # 获取div中的所有<p>子元素
+                p_elements: NodeList[Element] = div.getElementsByTagName('p')
 
-            # 遍历每个<p>元素
-            for p in p_elements:
-                line: TTMLLine = TTMLLine(p)
-                self.__lines.append(line)
-                self.__have_bg |= line.have_bg()
-                self.__have_ts |= line.have_ts()
-                self.__have_duet |= line.have_duet()
+                # 遍历每个<p>元素
+                for p in p_elements:
+                    line: TTMLLine = TTMLLine(p)
+                    self.__lines.append(line)
+                    self.__have_bg |= line.have_bg()
+                    self.__have_ts |= line.have_ts()
+                    self.__have_duet |= line.have_duet()
+                    index += 1
         else:
             TTMLError.throw_dom_error()
 

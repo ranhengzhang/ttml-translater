@@ -7,14 +7,20 @@ class TTMLTime:
 
     def __init__(self, centi: str = ''):
         if centi == '': return
-        # 使用 finditer 获取匹配的迭代器
-        matches: Iterator[Match[str]] = TTMLTime.__pattern.finditer(centi)
-        # 获取下一个匹配
-        iterator: Iterator[Match[str]] = iter(matches)  # 将匹配对象转换为迭代器
+        # 获取匹配结果的数组
+        match: list[str] = self.__pattern.findall(centi)
 
-        self.__minute: int = int(next(iterator).group())
-        self.__second: int = int(next(iterator).group())
-        self.__micros: int = int(next(iterator).group())
+        if len(match) < 2:
+            raise ValueError(f'Invalid time: {centi}')
+
+        count: int = 0
+        for t in match[:-1]:
+            count = count * 60 + int(t)
+        count = count * 1000 + int(match[-1])
+        self.__micros: int = count % 1000
+        count //= 1000
+        self.__second: int = count % 60
+        self.__minute: int = count // 60
 
     def __str__(self) -> str:
         return f'{self.__minute:02}:{self.__second:02}.{self.__micros:03}'
